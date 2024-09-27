@@ -1,4 +1,6 @@
-db.collection.aggregate([
+use('gastospublicos')
+
+db.EmendasParlamentares.aggregate([
     {
         $addFields: {
             // Convert "Ano da Emenda" to a complete DateTime
@@ -199,6 +201,6 @@ db.collection.aggregate([
         }
     },
     {
-        $out: "new_collection_name" // Specify the name for the new collection
+        $out: "slv_emendasparlamentares"// Specify the name for the new collection
     }
 ]);
