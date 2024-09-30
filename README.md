@@ -7,7 +7,7 @@ A transparência na gestão pública é fundamental para o fortalecimento da dem
 
 ## Arquitetura 
 
-!["Esquema diagramático da Solução"]("https://github.com/rafaennes/coleta_projeto/blob/main/diagrama_solu%C3%A7%C3%A3o.png")
+!["Esquema diagramático da Solução"](https://github.com/rafaennes/coleta_projeto/blob/main/diagrama_solu%C3%A7%C3%A3o.png)
 
 ### Organização do Github
 (descrever pastas e arquivos dentro dela)
