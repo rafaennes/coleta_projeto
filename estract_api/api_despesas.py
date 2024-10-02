@@ -69,16 +69,5 @@ def download_ytd():
     
     return jsonify({"files": files, "message": "seus arquivos já estão disponíveis"})
 
-# Clean up the downloaded files after sending them
-@app.after_request
-def cleanup(response):
-    for file in os.listdir('.'):
-        if file.endswith('.csv'):
-            try:
-                os.remove(file)
-            except Exception as e:
-                print(f"Error deleting file {file}: {e}")
-    return response
-
 if __name__ == '__main__':
     app.run(debug=True)
