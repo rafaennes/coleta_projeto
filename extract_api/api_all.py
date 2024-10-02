@@ -40,7 +40,7 @@ def download_last(data_type):
 
     current_ym = get_year_month_str()
     url = f"{BASE_URLS[data_type]}{current_ym}"
-    
+
     # Create the data directory if it doesn't exist
     if not os.path.exists('data'):
         os.makedirs('data')
@@ -85,7 +85,7 @@ def download_ytd(data_type):
 
     current_year = datetime.now().year
     current_month = datetime.now().month
-    
+
     if not os.path.exists('data'):
         os.makedirs('data')
 
@@ -104,4 +104,4 @@ def download_ytd(data_type):
 
 if __name__ == '__main__':
     # Run the Flask app
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0', port=5000)

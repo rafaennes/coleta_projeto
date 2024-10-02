@@ -4,7 +4,7 @@ FROM python:3.9-slim
 #Copiando arquivos pro pyspark de outra imagem
 COPY --from=openjdk:8-jre-slim /usr/local/openjdk-8 /usr/local/openjdk-8
 
-ENV JAVA_HOME /usr/local/openjdk-8
+ENV JAVA_HOME=/usr/local/openjdk-8
 
 RUN update-alternatives --install /usr/bin/java java /usr/local/openjdk-8/bin/java 1
 
@@ -16,7 +16,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the Python API code
-COPY extract_api/ .   
+COPY extract_api/ .
 
 # Install Spark
 RUN apt-get -y update; apt-get -y install curl
@@ -34,5 +34,3 @@ ENV PYSPARK_DRIVER_PYTHON=python3
 
 # Command to run the API
 CMD ["python", "api_all.py"]
-
-
