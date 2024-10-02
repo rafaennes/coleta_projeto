@@ -4,11 +4,11 @@ from datetime import datetime
 
 app = Flask(__name__)
 
-BASE_URL = "https://portaldatransparencia.gov.br/download-de-dados/orcamento"
+BASE_URL = "https://portaldatransparencia.gov.br/download-de-dados/orcamento-despesa"
 
-def download_file(year_month):
-    url = f"{BASE_URL}/{year_month}"
-    filename = f"orcamento_{year_month}.csv"
+def download_file(year):
+    url = f"{BASE_URL}/{year}"
+    filename = f"orcamento_{year}.csv"
     response = requests.get(url)
     
     if response.status_code == 200:
@@ -18,12 +18,12 @@ def download_file(year_month):
     else:
         return None, "Portal da Transparência com instabilidades, tente novamente mais tarde"
 
-@app.route('/download_orcamento', methods=['GET'])
+@app.route('/download_last', methods=['GET'])
 def download_orcamento():
     current_date = datetime.now()
-    year_month = current_date.strftime("%Y%m")
+    year = current_date.strftime("%Y")
     
-    filename, message = download_file(year_month)
+    filename, message = download_file(year)
     
     if filename:
         return send_file(filename, as_attachment=True)

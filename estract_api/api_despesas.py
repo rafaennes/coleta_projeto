@@ -1,73 +1,90 @@
-from flask import Flask, jsonify, send_file
+from flask import Flask, jsonify
 import requests
-from datetime import datetime, timedelta
-import os
+import io
+from datetime import datetime
 
 app = Flask(__name__)
 
-BASE_URL = "https://portaldatransparencia.gov.br/download-de-dados/despesas-execucao"
+BASE_URL = "https://portaldatransparencia.gov.br/download-de-dados/despesas-execucao/{}"
 
-# Function to generate URL and download file for a given year and month
+
 def download_file(year_month):
-    url = f"{BASE_URL}/{year_month}"
-    filename = f"despesas_execucao_{year_month}.csv"
+    """Downloads the CSV file for the given YYYYMM and saves it."""
+    url = BASE_URL.format(year_month)
+    print(f"Attempting to download from URL: {url}")  # Debugging statement
     response = requests.get(url)
-    
-    if response.status_code == 200:
-        with open(filename, 'wb') as f:
-            f.write(response.content)
-        return filename, "seus arquivos já estão disponíveis"
-    else:
-        return None, "Portal da Transparência com instabilidades, tente novamente mais tarde"
 
-# Route to download file for the current month
+    if response.status_code == 200:
+        file_name = f"despesas_orcamento_{year_month}.csv"
+
+        # Decode response content to a string using ISO-8859-1
+        content = response.content.decode('ISO-8859-1')
+
+        # Use StringIO to manage string content
+        with io.StringIO(content) as csvfile:
+            with open(file_name, 'w', encoding='ISO-8859-1', newline='') as output_file:
+                output_file.write(csvfile.getvalue())
+
+        print(f"File saved as: {file_name}")  # Debugging statement
+        return file_name
+    else:
+        print(f"Failed to download file. Status code: {response.status_code}")  # Debugging statement
+        return None
+
+
 @app.route('/download_last', methods=['GET'])
 def download_last():
-    current_date = datetime.now()
-    year_month = current_date.strftime("%Y%m")
+    """Downloads the CSV for the last month."""
+    now = datetime.now()
+    last_month = now.month - 1 if now.month > 1 else 12
+    last_year = now.year if now.month > 1 else now.year - 1
+    last_month_year_month = f"{last_year}{last_month:02d}"
     
-    filename, message = download_file(year_month)
-    
-    if filename:
-        return send_file(filename, as_attachment=True)
+    file_name = download_file(last_month_year_month)
+    if file_name:
+        return jsonify({"message": f"File {file_name} downloaded successfully."}), 200
     else:
-        return jsonify({"message": message}), 500
+        return jsonify({"error": "Failed to download file."}), 404
 
-# Route to download files for the last 'n' months
+
 @app.route('/download_last_n_months/<int:n>', methods=['GET'])
 def download_last_n_months(n):
-    current_date = datetime.now()
-    files = []
-    
-    for i in range(n):
-        target_date = current_date - timedelta(days=i*30)  # Approximation for month intervals
-        year_month = target_date.strftime("%Y%m")
-        filename, message = download_file(year_month)
-        
-        if filename:
-            files.append(filename)
-        else:
-            return jsonify({"message": message}), 500
-    
-    return jsonify({"files": files, "message": "seus arquivos já estão disponíveis"})
+    """Downloads CSV files for the last n months."""
+    now = datetime.now()
+    files_downloaded = []
 
-# Route to download files from January until the current month (Year-To-Date)
+    for i in range(n):
+        month_to_download = now.month - i
+        year_to_download = now.year
+
+        if month_to_download <= 0:
+            month_to_download += 12
+            year_to_download -= 1
+
+        year_month = f"{year_to_download}{month_to_download:02d}"
+        file_name = download_file(year_month)
+        
+        if file_name:
+            files_downloaded.append(file_name)
+
+    return jsonify({"files_downloaded": files_downloaded}), 200
+
+
 @app.route('/download_ytd', methods=['GET'])
 def download_ytd():
-    current_date = datetime.now()
-    files = []
-    
-    # Loop from January until the current month
-    for month in range(1, current_date.month + 1):
-        year_month = f"{current_date.year}{month:02d}"
-        filename, message = download_file(year_month)
+    """Downloads CSV files from January to the current month of the current year."""
+    now = datetime.now()
+    files_downloaded = []
+
+    for month in range(1, now.month + 1):
+        year_month = f"{now.year}{month:02d}"
+        file_name = download_file(year_month)
         
-        if filename:
-            files.append(filename)
-        else:
-            return jsonify({"message": message}), 500
-    
-    return jsonify({"files": files, "message": "seus arquivos já estão disponíveis"})
+        if file_name:
+            files_downloaded.append(file_name)
+
+    return jsonify({"files_downloaded": files_downloaded}), 200
+
 
 if __name__ == '__main__':
     app.run(debug=True)
