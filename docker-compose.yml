@@ -7,6 +7,8 @@ services:
       - mongo
     environment:
       - MONGO_URI=mongodb://mongo:27017  # MongoDB connection string
+    ports:
+      - "5000:5000"  # Expose the API on port 5000
 
   mongo:
     image: mongo:latest
@@ -27,6 +29,9 @@ services:
       - mongo
     command: >
       bash -c "sleep 10 && 
+      curl GET http://127.0.0.1:5000/download_last_n_months/despesas-execucao/3 &&
+      curl GET http://127.0.0.1:5000/download_last_n_months/notas-fiscais/3 &&
+      curl GET http://127.0.0.1:5000/download_last_n_months/emendas-parlamentares/3 &&
       python /app/pyspark/load_to_mongodb.py && 
       mongo --host mongo /app/elt_mongodb/script1.js && 
       mongo --host mongo /app/elt_mongodb/script2.js"
