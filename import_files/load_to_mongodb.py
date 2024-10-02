@@ -45,7 +45,7 @@ def process_file(file_path):
         df.write \
             .format("mongo") \
             .mode("append") \
-            .option("database", "your_database_name") \
+            .option("database", "gastospublicos") \
             .option("collection", collection_name) \
             .save()
 
