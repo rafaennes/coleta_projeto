@@ -28,13 +28,13 @@ services:
     depends_on:
       - mongo
     command: >
-      bash -c "sleep 10 &&
+      bash -c "sleep 10 && 
       curl http://api:5000/download_last_n_months/despesas-execucao/3 &&
       curl http://api:5000/download_last_n_months/notas-fiscais/3 &&
       curl http://api:5000/download_last_n_months/emendas-parlamentares/3 &&
-      python /app/pyspark/load_to_mongodb.py &&
-      mongo --host mongo /app/elt_mongodb/script1.js &&
-      mongo --host mongo /app/elt_mongodb/script2.js"
+      python /app/pyspark/load_to_mongodb.py && 
+      mongo --host mongo /app/elt_mongodb/despesas.js && 
+      mongo --host mongo /app/elt_mongodb/notasfiscais.js"
 
 volumes:
   mongo_data:
