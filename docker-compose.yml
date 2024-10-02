@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  api:
+    build: .
+    volumes:
+      - ./data:/app/data  # Persist the data directory
+    depends_on:
+      - mongo
+    environment:
+      - MONGO_URI=mongodb://mongo:27017  # MongoDB connection string
+
+  mongo:
+    image: mongo:latest
+    restart: always
+    volumes:
+      - mongo_data:/data/db  # Persist MongoDB data
+    ports:
+      - "27017:27017"  # Expose MongoDB for Grafana to connect
+
+  pyspark:
+    image: apache/spark-py
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./data:/app/data  # Mount data directory
+    depends_on:
+      - mongo
+    command: >
+      bash -c "sleep 10 && 
+      python /app/pyspark/load_to_mongodb.py && 
+      mongo --host mongo /app/elt_mongodb/script1.js && 
+      mongo --host mongo /app/elt_mongodb/script2.js"
+
+volumes:
+  mongo_data:
