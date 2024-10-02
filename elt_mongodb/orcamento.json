@@ -22,8 +22,16 @@ cursor.forEach(doc => {
   // Create a new document with all fields from 'doc'
   const newDoc = { ...doc }; // Copy all fields
 
+  // Ensure 'exercicio' is converted to ISODate format if it's a valid year string
+  if (doc.exercicio && /^\d{4}$/.test(doc.exercicio)) {
+    // Correctly convert the year to an ISODate
+    newDoc.exercicio = new Date(doc.exercicio, 0, 1); // Using Date(year, month, day)
+  } else {
+    // Handle invalid 'exercicio' as per your needs, e.g., setting it to null or leaving it unchanged
+    newDoc.exercicio = null; // or leave it as doc.exercicio if you don't want to modify it
+  }
+
   // Update the modified fields in the new document
-  newDoc.exercicio = new ISODate(doc.exercicio + "-01-01T00:00:00Z");
   newDoc["ORÇAMENTO INICIAL (R$)"] = orcamentoInicial;
   newDoc["ORÇAMENTO ATUALIZADO (R$)"] = orcamentoAtualizado;
   newDoc["ORÇAMENTO EMPENHADO (R$)"] = orcamentoEmpenhado;
