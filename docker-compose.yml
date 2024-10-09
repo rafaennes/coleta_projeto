@@ -1,5 +1,6 @@
 services:
-  api:
+  # consome os dados para o pipeline ELT
+  internal-api:
     build: .
     volumes:
       - ./data:/app/data  # Persist the data directory
@@ -25,16 +26,17 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ./data:/app/data  # Mount data directory
+      - ./:/app
     depends_on:
       - mongo
     command: >
-      bash -c "sleep 10 && 
-      curl http://api:5000/download_last_n_months/despesas-execucao/3 &&
-      curl http://api:5000/download_last_n_months/notas-fiscais/3 &&
-      curl http://api:5000/download_last_n_months/emendas-parlamentares/3 &&
-      python /app/pyspark/load_to_mongodb.py && 
-      mongo --host mongo /app/elt_mongodb/despesas.js && 
-      mongo --host mongo /app/elt_mongodb/notasfiscais.js"
+      bash -c "sleep 10 &&
+        curl http://internal-api:5000/download_last_n_months/despesas-execucao/3 &&
+        curl http://internal-api:5000/download_last_n_months/notas-fiscais/3 &&
+        curl http://internal-api:5000/download_last_n_months/emendas-parlamentares/3 &&
+        python /app/import_files/load_to_mongodb.py &&
+        mongosh --host mongo /app/elt_mongodb/despesas.js &&
+        mongosh --host mongo /app/elt_mongodb/notasfiscais.js"
 
 volumes:
   mongo_data:
